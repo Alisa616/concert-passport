@@ -11,6 +11,8 @@ class ConcertType(enum.Enum):
 
 
 class Users(db.Model):
+    __tablename__ = 'users'
+
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=True)
     email = db.Column(db.String(100), unique=True, nullable=False)
@@ -24,6 +26,8 @@ class Users(db.Model):
         return '<Users %r>' % self.name
 
 class Artists(db.Model):
+    __tablename__ = 'artists'
+
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     genre = db.Column(db.String(50), nullable=True)
@@ -34,6 +38,8 @@ class Artists(db.Model):
         return '<Artists %r>' % self.name
 
 class Concerts(db.Model):
+    __tablename__ = 'concerts'
+
     id = db.Column(db.Integer, primary_key=True)
     artist_id = db.Column(db.Integer, db.ForeignKey('artists.id'), nullable=False)
     city = db.Column(db.String(100), nullable=False)
@@ -47,9 +53,11 @@ class Concerts(db.Model):
         return f'<Concerts by {self.artist.name} in {self.city} on {self.event_date}>'
 
 class Attendance(db.Model):
+    __tablename__ = 'attendance'
+
     id = db.Column(db.Integer, primary_key=True)
-    concert_id = db.Column(db.Integer, db.ForeignKey('concert.id'), nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    concert_id = db.Column(db.Integer, db.ForeignKey('concerts.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     rating = db.Column(db.Integer, nullable=True)
     review = db.Column(db.Text, nullable=True)
     photo_url = db.Column(db.String(255), nullable=True)
