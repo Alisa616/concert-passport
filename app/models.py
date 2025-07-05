@@ -1,8 +1,7 @@
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 import enum
-
-db = SQLAlchemy()
+from . import db
 
 class ConcertType(enum.Enum):
     solo = 'solo'
@@ -19,6 +18,7 @@ class Users(db.Model):
     city = db.Column(db.String(100), nullable=True)
     birth_date = db.Column(db.Date, nullable=True)
     registred_at = db.Column(db.TIMESTAMP, nullable=False, default=datetime.utcnow)
+
 
     attendance = db.relationship('Attendance', backref='user', lazy=True)
 
