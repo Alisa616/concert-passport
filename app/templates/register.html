@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block title %}{% endblock %}
+
+{% block content %}
+    <div class="container w-50 mt-5 d-flex flex-column align-items-center">
+        <img class="mb-4 mt-5" src="images/blogging.png" alt="" width="57" height="57">
+        <form action="/register" method="post">
+
+            <h1 class="h3 mb-3 fw-normal">Registration</h1>
+
+            <div class="form-floating mb-2">
+                <input type="text" class="form-control" id="nameInput" placeholder="Имя" name="name">
+                <label for="nameInput">Имя</label>
+            </div>
+             <div class="form-floating mb-2">
+                <input type="email" class="form-control" id="emailInput" placeholder="Почта" name="email">
+                <label for="emailInput">Почта</label>
+            </div>
+             <div class="form-floating mb-2">
+                <input type="text" class="form-control" id="cityInput" placeholder="Город" name="city">
+                <label for="cityInput">Город</label>
+            </div>
+             <div class="form-floating mb-2">
+                <input type="date" class="form-control" id="birthdayInput" name="birthday">
+                <label for="birthdayInput">День рождения</label>
+            </div>
+            <div class="form-floating">
+                <input type="password" class="form-control" id="passwordInput" placeholder="Пароль" name="password">
+                <label for="passwordInput">Пароль</label>
+            </div>
+            <button class="btn mt-2 mb-2 btn-primary w-100 py-2" type="submit">Регистрация</button>
+        </form>
+        <a href="/login" class="btn btn-link">Войти</a>
+        <a href="/" class="btn btn-link">Главная</a>
+    </div>
+{% endblock %}

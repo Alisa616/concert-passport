@@ -1,4 +1,6 @@
-from flask_sqlalchemy import SQLAlchemy
+from werkzeug.security import generate_password_hash, check_password_hash
+from flask_login import UserMixin
+# from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 import enum
 from . import db
@@ -9,7 +11,7 @@ class ConcertType(enum.Enum):
     festival = 'festival'
 
 
-class Users(db.Model):
+class Users(db.Model, UserMixin):
     __tablename__ = 'users'
 
     id = db.Column(db.Integer, primary_key=True)
@@ -17,10 +19,16 @@ class Users(db.Model):
     email = db.Column(db.String(100), unique=True, nullable=False)
     city = db.Column(db.String(100), nullable=True)
     birth_date = db.Column(db.Date, nullable=True)
+    password_hash = db.Column(db.String(128), nullable=False)
     registred_at = db.Column(db.TIMESTAMP, nullable=False, default=datetime.utcnow)
 
-
     attendance = db.relationship('Attendance', backref='user', lazy=True)
+
+    def set_password(self, password):
+        self.password_hash = generate_password_hash(password)
+
+    def check_password(self, password):
+        return check_password_hash(self.password_hash, password)
 
     def __repr__(self):
         return '<Users %r>' % self.name

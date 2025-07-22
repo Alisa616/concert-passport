@@ -4,24 +4,20 @@
 
 {% block content %}
     <div class="container my-5">
-        <a href="{{ url_for('show_concerts')}}" class="btn btn-secondary mb-4"></a>
     <div class="row row-cols-1 row-cols-md-2 g-4">
         <ul class="no-bullets">
-            {% for concert in concerts %}
-                <div class="col">
-                    <div class="card mb-1 bg-light h-100 shadow-sm">
-                        <div class="card-body">
-                            <h5 class="card-title">{{ concert.artist.name }}</h5>
-                            <p class="card-text">
-                                <strong>Город:</strong> {{ concert.venue or 'Не указано' }}<br>
-                                <strong>Дата:</strong> {{ concert.event_type.value }}<br>
-                            </p>
-                            <a href="{{ url_for('concert_detail', concert_id=concert.id)}}" class="btn btn-primary">Подробнее</a>
-                        </div>
+            <div class="col">
+                <a href="{{ url_for('show_concerts', concert_id=concert.id)}}" class="btn btn-primary mb-4">Назад</a>
+                <div class="card mb-1 bg-light h-100 shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ concert.artist.name }}</h5>
+                        <p class="card-text">
+                            <strong>Место:</strong> {{ concert.venue or 'Не указано' }}<br>
+                            <strong>Тип:</strong> {{ concert.event_type.value }}<br>
+                        </p>
                     </div>
                 </div>
-
-            {% endfor %}
+            </div>
         </ul>
     </div>
 
