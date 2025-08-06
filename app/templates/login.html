@@ -1,25 +1,50 @@
+<!-- app/templates/login.html -->
 {% extends 'base.html' %}
 
-{% block title %}{% endblock %}
+{% block title %}Вход - {{ super() }}{% endblock %}
 
 {% block content %}
-<div class="container w-50 mt-5 d-flex flex-column align-items-center">
-        <img class="mb-4 mt-5" src="images/blogging.png" alt="" width="57" height="57">
-        <form action="/login" method="post">
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-4">
+            <div class="card shadow mt-5">
+                <div class="card-body">
+                    <div class="text-center mb-4">
+                        <i class="fa fa-user-circle fa-3x text-primary"></i>
+                        <h1 class="h3 mt-3 fw-normal">Вход в систему</h1>
+                    </div>
 
-            <h1 class="h3 mb-3 fw-normal">Login</h1>
+                    <form action="{{ url_for('login') }}" method="post">
+                        <div class="form-floating mb-3">
+                            <input type="email" class="form-control" id="emailInput"
+                                   placeholder="Почта" name="email" required>
+                            <label for="emailInput">Почта</label>
+                        </div>
 
-             <div class="form-floating mb-2">
-                <input type="email" class="form-control" id="emailInput" placeholder="Почта" name="email">
-                <label for="emailInput">Почта</label>
+                        <div class="form-floating mb-3">
+                            <input type="password" class="form-control" id="passwordInput"
+                                   placeholder="Пароль" name="password" required>
+                            <label for="passwordInput">Пароль</label>
+                        </div>
+
+                        <button class="btn btn-primary w-100 py-2 mb-3" type="submit">
+                            Войти
+                        </button>
+                    </form>
+
+                    <div class="text-center">
+                        <p class="mb-2">Нет аккаунта?</p>
+                        <a href="{{ url_for('register') }}" class="btn btn-outline-primary">
+                            Зарегистрироваться
+                        </a>
+                        <br>
+                        <a href="{{ url_for('index') }}" class="btn btn-link mt-2">
+                            На главную
+                        </a>
+                    </div>
+                </div>
             </div>
-            <div class="form-floating">
-                <input type="password" class="form-control" id="passwordInput" placeholder="Пароль" name="password">
-                <label for="passwordInput">Пароль</label>
-            </div>
-            <button class="btn mt-2 mb-2 btn-primary w-100 py-2" type="submit">Регистрация</button>
-        </form>
-        <a href="/register" class="btn btn-link">Зарегистрироваться</a>
-        <a href="/" class="btn btn-link">Главная</a>
+        </div>
     </div>
+</div>
 {% endblock %}

@@ -1,25 +1,61 @@
+<!-- app/templates/concert_detail.html -->
 {% extends 'base.html' %}
 
-{% block title %}{% endblock %}
+{% block title %}{{ concert.artist.name }} - {{ super() }}{% endblock %}
 
 {% block content %}
-    <div class="container my-5">
-    <div class="row row-cols-1 row-cols-md-2 g-4">
-        <ul class="no-bullets">
-            <div class="col">
-                <a href="{{ url_for('show_concerts', concert_id=concert.id)}}" class="btn btn-primary mb-4">Назад</a>
-                <div class="card mb-1 bg-light h-100 shadow-sm">
-                    <div class="card-body">
-                        <h5 class="card-title">{{ concert.artist.name }}</h5>
-                        <p class="card-text">
-                            <strong>Место:</strong> {{ concert.venue or 'Не указано' }}<br>
-                            <strong>Тип:</strong> {{ concert.event_type.value }}<br>
-                        </p>
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <!-- Кнопка назад -->
+            <a href="{{ url_for('show_concerts') }}" class="btn btn-outline-secondary mb-4">
+                <i class="fa fa-arrow-left"></i> Назад к списку концертов
+            </a>
+
+            <!-- Карточка концерта -->
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="card-title mb-0">{{ concert.artist.name }}</h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5>Информация о концерте</h5>
+                            <p><strong>Город:</strong> {{ concert.city }}</p>
+                            <p><strong>Дата:</strong> {{ concert.event_date.strftime('%d.%m.%Y') }}</p>
+                            <p><strong>Место проведения:</strong> {{ concert.venue or 'Не указано' }}</p>
+                            <p><strong>Тип события:</strong>
+                                {% if concert.event_type.value == 'solo' %}
+                                    Сольный концерт
+                                {% elif concert.event_type.value == 'tour' %}
+                                    Тур
+                                {% elif concert.event_type.value == 'festival' %}
+                                    Фестиваль
+                                {% else %}
+                                    {{ concert.event_type.value }}
+                                {% endif %}
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <h5>Об артисте</h5>
+                            <p><strong>Имя:</strong> {{ concert.artist.name }}</p>
+                            <p><strong>Жанр:</strong> {{ concert.artist.genre or 'Не указан' }}</p>
+                        </div>
                     </div>
+
+                    {% if current_user.is_authenticated %}
+                        <div class="mt-4">
+                            <button class="btn btn-success">Отметить посещение</button>
+                            <button class="btn btn-outline-primary">Добавить в избранное</button>
+                        </div>
+                    {% else %}
+                        <div class="mt-4 text-muted">
+                            <p><a href="{{ url_for('login') }}">Войдите</a>, чтобы отметить посещение концерта</p>
+                        </div>
+                    {% endif %}
                 </div>
             </div>
-        </ul>
+        </div>
     </div>
-
 </div>
 {% endblock %}

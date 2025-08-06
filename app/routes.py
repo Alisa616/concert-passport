@@ -1,24 +1,11 @@
 from flask import render_template, request, url_for, flash, redirect
-from flask_login import login_user, LoginManager, login_required, logout_user, current_user
-from sqlalchemy.testing.pickleable import User
-
+from flask_login import login_user, login_required, logout_user, current_user
+from datetime import datetime
 from . import db
 from .models import Concerts, Users
-from datetime import datetime
-
-
-login_manager = LoginManager()
 
 
 def init_routes(app):
-
-    login_manager.init_app(app)
-    login_manager.login_view = "login"
-
-    @login_manager.user_loader
-    def load_user(user_id):
-        return Users.query.filter_by(email=user_id).first()
-
     @app.route('/')
     def index():
         return render_template("index.html")
@@ -26,7 +13,6 @@ def init_routes(app):
     @app.route("/concerts")
     def show_concerts():
         concerts = Concerts.query.order_by(Concerts.event_date).all()
-
         return render_template('concerts.html', concerts=concerts)
 
     @app.route("/concerts/<int:concert_id>")
@@ -41,14 +27,19 @@ def init_routes(app):
             email = request.form['email']
             city = request.form.get('city') or None
             birthday_str = request.form.get('birthday')
-            birthdate = datetime.strptime(birthday_str, '%Y-%m-%d') if birthday_str else None
             password = request.form['password']
-            print(f"Вот пароль {password}")
 
+            # Проверяем дату рождения
+            birthdate = None
+            if birthday_str:
+                birthdate = datetime.strptime(birthday_str, '%Y-%m-%d').date()
+
+            # Проверяем, существует ли пользователь
             if Users.query.filter_by(email=email).first():
-                flash('Пользователь с таким email уже существует')
+                flash('Пользователь с таким email уже существует', 'danger')
                 return redirect(url_for('register'))
 
+            # Создаем нового пользователя
             new_user = Users(
                 name=name,
                 email=email,
@@ -56,31 +47,32 @@ def init_routes(app):
                 birth_date=birthdate
             )
             new_user.set_password(password)
-            db.session.add(new_user)
-            db.session.commit()
 
-            login_user(new_user)
-            return redirect(url_for('login'))
+            try:
+                db.session.add(new_user)
+                db.session.commit()
+                flash('Регистрация прошла успешно! Теперь вы можете войти.', 'success')
+                return redirect(url_for('login'))
+            except Exception as e:
+                db.session.rollback()
+                flash('Ошибка при регистрации. Попробуйте еще раз.', 'danger')
+                return redirect(url_for('register'))
 
         return render_template('register.html')
 
-
     @app.route("/login", methods=['GET', 'POST'])
-    @login_required
     def login():
         if request.method == 'POST':
             email = request.form['email']
             password = request.form['password']
-            user = Users.authenticate(email, password)
 
+            user = Users.authenticate(email, password)
             if user:
                 login_user(user)
+                flash(f'Добро пожаловать, {user.name}!', 'success')
                 return redirect(url_for('show_concerts'))
             else:
                 flash('Неверный логин или пароль', 'danger')
-
-        else:
-            flash('Форма заполнена некорректно', 'danger')
 
         return render_template('login.html')
 
@@ -89,14 +81,4 @@ def init_routes(app):
     def logout():
         logout_user()
         flash('Вы вышли из системы', 'success')
-        return redirect(url_for('show_concerts'))
-
-
-
-
-
-
-
-
-
-
+        return redirect(url_for('index'))

@@ -1,6 +1,76 @@
+<!-- app/templates/index.html -->
 {% extends 'base.html' %}
 
-{% block title %}{% endblock %}
+{% block title %}Главная - {{ super() }}{% endblock %}
 
 {% block content %}
+<div class="container">
+    <!-- Приветственная секция -->
+    <div class="row justify-content-center text-center my-5">
+        <div class="col-md-8">
+            <h1 class="display-4 mb-4">Добро пожаловать!</h1>
+            <p class="lead mb-4">
+                Это ваш личный сайт для отслеживания концертов и музыкальных событий.
+                Здесь вы можете найти информацию о предстоящих концертах любимых артистов.
+            </p>
+
+            {% if current_user.is_authenticated %}
+                <div class="alert alert-success">
+                    <h4>Привет, {{ current_user.name }}!</h4>
+                    <p>Готовы исследовать мир музыки?</p>
+                </div>
+            {% else %}
+                <div class="mb-4">
+                    <a href="{{ url_for('register') }}" class="btn btn-primary btn-lg me-3">
+                        Присоединиться
+                    </a>
+                    <a href="{{ url_for('login') }}" class="btn btn-outline-primary btn-lg">
+                        Войти
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Быстрые ссылки -->
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <div class="card h-100 text-center">
+                        <div class="card-body">
+                            <i class="fa fa-music fa-3x text-primary mb-3"></i>
+                            <h5 class="card-title">Концерты</h5>
+                            <p class="card-text">
+                                Просмотрите список предстоящих концертов и найдите что-то интересное для себя.
+                            </p>
+                            <a href="{{ url_for('show_concerts') }}" class="btn btn-primary">
+                                Смотреть концерты
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="card h-100 text-center">
+                        <div class="card-body">
+                            <i class="fa fa-users fa-3x text-success mb-3"></i>
+                            <h5 class="card-title">Сообщество</h5>
+                            <p class="card-text">
+                                Присоединитесь к сообществу любителей музыки и делитесь впечатлениями о концертах.
+                            </p>
+                            {% if current_user.is_authenticated %}
+                                <span class="btn btn-success disabled">Вы уже с нами!</span>
+                            {% else %}
+                                <a href="{{ url_for('register') }}" class="btn btn-success">
+                                    Присоединиться
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
