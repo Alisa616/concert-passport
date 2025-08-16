@@ -82,3 +82,34 @@ def init_routes(app):
         logout_user()
         flash('Вы вышли из системы', 'success')
         return redirect(url_for('index'))
+
+    @app.route("/profile", methods=['GET', 'POST'])
+    @login_required
+    def profile():
+        if request.method == 'POST':
+            # Обновляем данные пользователя
+            current_user.name = request.form['name']
+            current_user.city = request.form.get('city') or None
+
+            birthday_str = request.form.get('birthday')
+            if birthday_str:
+                current_user.birth_date = datetime.strptime(birthday_str, '%Y-%m-%d').date()
+            else:
+                current_user.birth_date = None
+
+            new_password = request.form['new_password']
+            if new_password:
+                current_user.set_password(new_password)
+
+            try:
+                db.session.commit()
+                flash("профиль успешно обновлен", "success")
+            except Exception as e:
+                db.session.rollback()
+                flash("Ошибка при обновлении профиля", "danger")
+            return redirect(url_for('profile'))
+
+        concerts_attended = len(current_user.attendance)
+        return render_template("profile.html",
+                               user=current_user,
+                               concerts_attended=concerts_attended)
