@@ -23,7 +23,10 @@ class Users(db.Model, UserMixin):
     city = db.Column(db.String(100), nullable=True)
     birth_date = db.Column(db.Date, nullable=True)
     password_hash = db.Column(db.String(255), nullable=False)
+    profile_photo = db.Column(db.String(255), nullable=True)
+    is_admin = db.Column(db.Boolean, nullable=False, default=False)
     registered_at = db.Column(db.TIMESTAMP, nullable=False, default=datetime.utcnow)
+
 
     # Связи
     attendance = db.relationship('Attendance', backref='user', lazy=True, cascade='all, delete-orphan')

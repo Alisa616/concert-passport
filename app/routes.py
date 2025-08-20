@@ -1,11 +1,32 @@
+import os
+
 from flask import render_template, request, url_for, flash, redirect
 from flask_login import login_user, login_required, logout_user, current_user
 from datetime import datetime
+
+from werkzeug.utils import secure_filename
+
 from . import db
 from .models import Concerts, Users
 
 
 def init_routes(app):
+    def allowed_file(filename):
+        return '.' in filename and filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
+
+    def save_profile_photo(file, user_id):
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            name, ext = os.path.splitext(filename)
+            filename = f'user_{user_id}_{name}{ext}'
+
+            file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            file.save(file_path)
+
+            return filename
+
+        return None
+
     @app.route('/')
     def index():
         return render_template("index.html")
@@ -97,13 +118,33 @@ def init_routes(app):
             else:
                 current_user.birth_date = None
 
+            if 'profile_photo' in request.files:
+                file = request.files['profile_photo']
+
+                if file.filename != '':
+                    if current_user.profile_photo:
+                        old_photo_path = os.path.join(app.config['UPLOAD_FOLDER'], current_user.profile_photo)
+                        if os.path.exists(old_photo_path):
+                            try:
+                                os.remove(old_photo_path)
+                            except:
+                                pass
+
+                    filename = save_profile_photo(file, current_user.id)
+                    if filename:
+                        current_user.profile_photo = filename
+                        flash('Фото профиля обновлено', 'success')
+                    else:
+                        flash('Ошибка загрузки фото', 'danger')
+
+
             new_password = request.form['new_password']
             if new_password:
                 current_user.set_password(new_password)
 
             try:
                 db.session.commit()
-                flash("профиль успешно обновлен", "success")
+                flash("Профиль успешно обновлен", "success")
             except Exception as e:
                 db.session.rollback()
                 flash("Ошибка при обновлении профиля", "danger")
@@ -113,3 +154,43 @@ def init_routes(app):
         return render_template("profile.html",
                                user=current_user,
                                concerts_attended=concerts_attended)
+
+    @app.route("/delete_photo", methods=['POST'])
+    @login_required
+    def delete_photo():
+        if current_user.profile_photo:
+            photo_path = os.path.join(app.config['UPLOAD_FOLDER'], current_user.profile_photo)
+            if os.path.exists(photo_path):
+                try:
+                    os.remove(photo_path)
+                except:
+                    pass
+
+            current_user.profile_photo = None
+            try:
+                db.session.commit()
+                flash('Фото профиля удалено', 'success')
+            except Exception as e:
+                db.session.rollback()
+                flash('Ошибка при удалении фото', 'danger')
+
+        return redirect(url_for('profile'))
+
+    @app.route("/admin/add_concert", methods=['GET', 'POST'])
+    @login_required
+    def add_concert():
+        """Добавление нового концерта (только для админа)"""
+        pass
+
+
+    @app.route("/admin/manage_concerts")
+    @login_required
+    def manage_concerts():
+        """Управление концертами (только для админа)"""
+        if not current_user.is_admin:
+            flash("Доступ запрещен. Только для админов", "danger")
+            return redirect(url_for('profile'))
+
+        concerts = Concerts.query.order_by(Concerts.event_date.desc()).all()
+        return render_template("admin/manage_concerts.html", concerts=concerts)
+

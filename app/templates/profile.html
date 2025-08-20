@@ -9,7 +9,13 @@
             <div class="col-md-4 mb-4">
                 <div class="card">
                     <div class="card-header bg-primary text-white text-center">
-                        <i class="fa fa-user fa-3x mb-2"></i>
+                        {% if user.profile_photo %}
+                            <img src="{{ url_for('static', filename='uploads/' + user.profile_photo) }}"
+                                 alt="Фото профиля" class="rounded-circle mb-2"
+                                 style="width: 100px; height: 100px; object-fit: cover;">
+                        {% else %}
+                            <i class="fa fa-user fa-3x mb-2"></i>
+                        {% endif %}
                         <h4>{{ user.name }}</h4>
                     </div>
                     <div class="card-body">
@@ -42,7 +48,41 @@
                 </h5>
             </div>
             <div class="card-body">
-                <form method="POST">
+                <form method="POST" enctype="multipart/form-data">
+
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h6><i class="fa fa-camera"></i> Фото профиля</h6>
+                            <div class="d-flex align-items-center">
+                                {% if user.profile_photo %}
+                                    <img src="{{ url_for('static', filename='uploads/' + user.profile_photo) }}"
+                                     alt="Текущее фото" class="rounded-circle me-3"
+                                    style="width: 60px; height: 60px; object-fit: cover;">
+                                    <div>
+                                        <input type="file" class="form-control mb-2" name="profile_photo"
+                                        accept="image/*" style="max-width: 250px;">
+                                        <small class="text-muted">JPG, PNG, GIF (макс. 16МБ)</small><br>
+                                        <button type="submit" formaction="{{ url_for('delete_photo') }}"
+                                            class="btn btn-sm btn-outline-danger mt-1"
+                                            onclick="return confirm('Удалить фото профиля?')">
+                                            <i class="fa fa-trash"></i> Удалить фото
+                                        </button>
+                                    </div>
+                                {% else %}
+                                    <div class="bg-light rounded-circle me-3 d-flex align-items-center justify-content-center"
+                                         style="width: 60px; height: 60px;">
+                                        <i class="fa fa-user text-muted"></i>
+                                    </div>
+                                    <div>
+                                        <input type="file" class="form-control mb-2" name="profile_photo"
+                                        accept="image/*" style="max-width: 250px;">
+                                        <small class="text-muted">JPG, PNG, GIF (макс. 16МБ)</small>
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <hr>
+                        </div>
+                    </div>
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-floating mb-3">
