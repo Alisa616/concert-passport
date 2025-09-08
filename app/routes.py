@@ -1,8 +1,8 @@
 import os
 
-from flask import render_template, request, url_for, flash, redirect
+from flask import render_template, request, url_for, flash, redirect, current_app
 from flask_login import login_user, login_required, logout_user, current_user
-from datetime import datetime
+from datetime import datetime, date
 
 from werkzeug.utils import secure_filename
 
@@ -44,16 +44,32 @@ def init_routes(app):
     @app.route("/register", methods=['GET', 'POST'])
     def register():
         if request.method == 'POST':
-            name = request.form['name']
-            email = request.form['email']
-            city = request.form.get('city') or None
-            birthday_str = request.form.get('birthday')
-            password = request.form['password']
+            name = (request.form.get('name') or "").strip()
+            raw_email = (request.form.get('email') or "").strip()
+            email = raw_email.lower()
+            city = (request.form.get('city') or "").strip() or None
+            password = (request.form.get('password') or "")
+            birthday_str = (request.form.get('birthday') or "").strip()
+
+            errors = ""
+            if not name:
+                errors +="Введите имя.\n"
+            if not email:
+                errors += "Введите email.\n"
+            if not password or len(password) < 6:
+                errors += "Пароль должен быть не короче 6 символов.\n"
+            if errors:
+                flash(errors.strip(), "danger")
+                return redirect(url_for('register'))
 
             # Проверяем дату рождения
             birthdate = None
             if birthday_str:
-                birthdate = datetime.strptime(birthday_str, '%Y-%m-%d').date()
+                try:
+                    birthdate = date.fromisoformat(birthday_str)
+                except ValueError:
+                    flash('Некорректная дата', 'danger')
+                    return redirect(url_for('register'))
 
             # Проверяем, существует ли пользователь
             if Users.query.filter_by(email=email).first():
@@ -76,7 +92,8 @@ def init_routes(app):
                 return redirect(url_for('login'))
             except Exception as e:
                 db.session.rollback()
-                flash('Ошибка при регистрации. Попробуйте еще раз.', 'danger')
+                current_app.logger.exception("Ошибка регистрации")
+                flash(f'Ошибка при регистрации: {type(e).__name__}', 'danger')
                 return redirect(url_for('register'))
 
         return render_template('register.html')
