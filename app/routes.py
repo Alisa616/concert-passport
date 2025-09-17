@@ -53,11 +53,11 @@ def init_routes(app):
 
             errors = ""
             if not name:
-                errors +="Введите имя.\n"
+                errors +="Введите имя."
             if not email:
-                errors += "Введите email.\n"
+                errors += "Введите email."
             if not password or len(password) < 6:
-                errors += "Пароль должен быть не короче 6 символов.\n"
+                errors += "Пароль должен быть не короче 6 символов."
             if errors:
                 flash(errors.strip(), "danger")
                 return redirect(url_for('register'))
@@ -197,6 +197,12 @@ def init_routes(app):
     @login_required
     def add_concert():
         """Добавление нового концерта (только для админа)"""
+        pass
+
+    @app.route("/admin/delete_concert/<int:concert_id>", methods=['POST'])
+    @login_required
+    def delete_concert(concert_id):
+        """Удаление концертов (только для админа)"""
         pass
 
 
