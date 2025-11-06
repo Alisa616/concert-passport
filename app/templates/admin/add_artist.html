@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+
+{% block title %} Добавить артиста - {{ super() }}{% endblock %}
+
+{% block content %}
+    <div class="container my-5">
+            <div class="row justify-concert-center">
+                <div class="col-md-8">
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item">
+                                <a href="{{ url_for('profile') }}"></a>
+                            </li>
+                            <li class="breadcrumb-item active">Добавить артиста</li>
+                        </ol>
+                    </nav>
+
+                    <div class="card">
+                        <div class="card-header bg-primary text-white">
+                            <h4>
+                                <i class="fa fa-plus-circle"></i> Добавить нового артиста
+                            </h4>
+                        </div>
+                        <div class="card-body">
+                            <form method="POST">
+                                <div class="row">
+                                    <div class="col-md-8">
+                                        <div class="form-floating mb-3">
+                                            <input type="text" class="form-control" id="nameInput"
+                                            name="name" placeholder="Имя артиста" required>
+                                            <label for="nameInput">Имя артиста *</label>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        <div class="form-floating mb-3">
+                                            <select class="form-control" id="genreInput" name="genre">
+                                                <option value="">Не указан</option>
+                                                <option value="Rock">Рок</option>
+                                                <option value="Pop">Поп</option>
+                                                <option value="Hip-hop">Хип-хоп</option>
+                                                <option value="Electronic">Электроник</option>
+                                                <option value="Jazz">Джаз</option>
+                                                <option value="Classical">Классическая</option>
+                                                <option value="Folk">Фолк</option>
+                                                <option value="Indie">Инди</option>
+                                            </select>
+                                            <label for="genreInput">Жанр</label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <small class="text-muted">
+                                        <i class="fa fa-info-circle"></i>
+                                        После добавления артиста, вы можете создать для него концерты
+                                    </small>
+                                </div>
+
+                                <div class="d-flex justify-content-between">
+                                    <a href="{{ url_for('profile') }}" class="btn btn-secondary">
+                                        <i class="fa fa-arrow-left"></i> Назад к профилю
+                                    </a>
+
+                                    <div>
+                                        <button type="submit" class="btn btn-primary me-2">
+                                            <i class="fa fa-save"></i> Добавить артиста
+                                        </button>
+                                        <a href="{{ url_for('add_concert') }}" class="btn btn-outline-success">
+                                            <i class="fa fa-forward"></i> К добавлению концертов
+                                        </a>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="card mt-4">
+                        <div class="card-header">
+                            <h6>
+                                <i class="fa fa-list"></i> Последние добавленные артисты
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            {% set recent_artists = [] %}
+                            {% for artist in [] %}
+                                <span class="badge bg-secondary me-1 mb-1">
+                                    {{ artist.name }}
+                                </span>
+                            {% else %}
+                                <p class="text-muted mb-0">
+                                    <i class="fa fa-info-circle"></i>
+                                    Здесь будут отображаться последние добавленные артисты
+                                </p>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+{% endblock %}

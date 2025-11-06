@@ -193,18 +193,79 @@ def init_routes(app):
 
         return redirect(url_for('profile'))
 
+    @app.route("/admin/add_artist", methods=['GET', 'POST'])
+    @login_required
+    def add_artist():
+        """Добавление нового артиста (только для админа)"""
+        if not current_user.is_admin:
+            flash("Доступ запрещен. Доступ только для администраторов", "danger")
+            return redirect(url_for('profile'))
+
+        if request.method == 'POST':
+            name = request.form['name']
+            genre = request.form.get('genre') or None
+
+            from .models import Artists
+            existing_artist = Artists.query.filter_by(name=name).first()
+            if existing_artist:
+                flash(f"Артист {name} уже существует", "warning")
+                return redirect(url_for('add_artist'))
+
+            new_artist = Artists(name=name, genre=genre)
+
+            try:
+                db.session.add(new_artist)
+                db.session.commit()
+                flash(f"Артист {name} успешно добавлен", "success")
+                return redirect(url_for('add_concert'))
+            except Exception as e:
+                db.session.rollback()
+                flash("Ошибка при добавлении арстиста", "danger")
+        return render_template("admin/add_artist.html")
+
     @app.route("/admin/add_concert", methods=['GET', 'POST'])
     @login_required
     def add_concert():
         """Добавление нового концерта (только для админа)"""
-        pass
+        if not current_user.is_admin:
+            flash("Доступ запрещен. Доступ только для администраторов", "danger")
+            return redirect(url_for('profile'))
 
-    @app.route("/admin/delete_concert/<int:concert_id>", methods=['POST'])
-    @login_required
-    def delete_concert(concert_id):
-        """Удаление концертов (только для админа)"""
-        pass
+        from .models import Artists
+        artists = Artists.query.all()
 
+        if request.method == 'POST':
+            artist_id = request.form['artist_id']
+            city = request.form['city']
+            event_date_str = request.form['event_date']
+            venue = request.form.get('venue') or None
+            event_type = request.form['event_type']
+
+            try:
+                event_date = datetime.strptime(event_date_str, '%Y-%m-%d').date()
+            except ValueError:
+                flash("Неправильный формат даты", "danger")
+                return redirect(url_for('add_concert'))
+
+            new_concert = Concerts(
+                artist_id=int(artist_id),
+                city=city,
+                event_date=event_date,
+                venue=venue,
+                event_type=event_type
+            )
+
+            try:
+                db.session.add(new_concert)
+                db.session.commit()
+                artist = Artists.query.get(artist_id)
+                flash(f"Концерт {artist.name} в {city} успешно добавлен", "success")
+                return redirect(url_for('add_concert'))
+            except Exception as e:
+                db.session.rollback()
+                flash("Ошибка при добавлении концерта", "danger")
+
+        return render_template("admin/add_concert.html", artists=artists)
 
     @app.route("/admin/manage_concerts")
     @login_required
@@ -216,4 +277,27 @@ def init_routes(app):
 
         concerts = Concerts.query.order_by(Concerts.event_date.desc()).all()
         return render_template("admin/manage_concerts.html", concerts=concerts)
+
+    @app.route("/admin/delete_concert/<int:concert_id>", methods=['POST'])
+    @login_required
+    def delete_concert(concert_id):
+        """Удаление концертов (только для админа)"""
+        if not current_user.is_admin:
+            flash("Доступ запрещен. Доступ только для администраторов", "danger")
+            return redirect(url_for('profile'))
+
+        concert = Concerts.query.get_or_404(concert_id)
+        artist_name = concert.artist.name
+        city = concert.city
+
+        try:
+            db.session.delete(concert)
+            db.session.commit()
+            flash(f"Концерт {artist_name} в {city} удален", "success")
+        except Exception as e:
+            db.session.rollback()
+            flash("Ошибка при удалении концерта", "danger")
+
+        return redirect(url_for("manage_concerts"))
+
 

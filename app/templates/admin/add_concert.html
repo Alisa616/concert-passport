@@ -1,0 +1,143 @@
+{% extends 'base.html' %}
+
+{% block title %} Добавить концерт - {{ super() }}{% endblock %}
+
+{% block content %}
+    <div class="container my-5">
+        <div class="row justify-content-center">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item">
+                        <a href="{{ url_for('profile') }}"></a>
+                    </li>
+                    <li class="breadcrumb-item active">Добавить концерт</li>
+                </ol>
+            </nav>
+
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                   <h4><i class="fa fa-calendar-plus-o"></i> Добавить новый концерт</h4>
+                </div>
+                <div class="card-body">
+                    {% if not artists %}
+                        <div class="alert alert-warning">
+                            <h6><i class="fa fa-exclamation-triangle"></i> Нет артистов!</h6>
+                            <p>Сначала нужно добавить хотя бы одного артиста</p>
+                            <a href="{{ url_for('add_artist')}}" class="btn btn-primary">
+                                <i class="fa fa-plus"></i> Добавить артиста
+                            </a>
+                        </div>
+                    {% else %}
+                        <form method="POST">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-floating mb-3">
+                                        <select class="form-control" id="artistInput" name="artist_id" required>
+                                            <option value="">Выберите артиста</option>
+                                            {% for artist in artists %}
+                                                <option value="{{ artist.id }}">
+                                                    {{ artist.name }}
+                                                    {% if artist.genre %}
+                                                    ({{ artist.genre }})
+                                                    {% endif %}
+                                                </option>
+                                            {% endfor %}
+                                        </select>
+                                        <label for="artistInput">Артист *</label>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="form-floating mb-3">
+                                        <input type="text" class="form-control" id="cityInput" name="city" placeholder="Город" required>
+                                        <label for="cityInput">Город *</label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-floating mb-3">
+                                        <input type="date" class="form-control" id="dateInput" name="event_date" required>
+                                        <label for="dateInput">Дата концерта *</label>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="form-floating mb-3">
+                                        <select class="form_control" id="typeInput" name="event_type" required>
+                                            <option value="solo">Сольный концерт</option>
+                                            <option value="tour">Концерт в рамках тура</option>
+                                            <option value="festival">Фестиваль</option>
+                                        </select>
+                                        <label for="typeInput"></label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-floating mb-3">
+                                        <input type="text" class="form-control" id="venueInput" name="venue" placeholder="Место проведения">
+                                        <label for="cityInput">Место проведения (площадка, клуб, зал)</label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <small class="text-muted">
+                                    <i class="fa fa-info-circle"></i>
+                                    Поля отмеченные *, обязательны для заполнения
+                                </small>
+                            </div>
+
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <a href="{{ url_for('profile') }}" class="btn btn-secondary">
+                                        <i class="fa fa-arrow-left"></i> Назад к профилю
+                                    </a>
+                                    <a href="{{ url_for('add_artist') }}" class="btn btn-outline-primary ms-2">
+                                        <i class="fa fa-user-plus"></i> Добавить артиста
+                                    </a>
+                                </div>
+
+                                <div>
+                                    <button type="submit" class="btn btn-success">
+                                        <i class="fa fa-save"></i> Добавить концерт
+                                    </button>
+                                    <a href="{{ url_for('manage_concerts') }}" class="btn btn-outline-info ms-2">
+                                        <i class="fa fa-list"></i> Управление концертами
+                                    </a>
+                                </div>
+                            </div>
+                        </form>
+                    {% endif %}
+                </div>
+            </div>
+
+            {% if artists %}
+                <div class="row mt-4">
+                    <div class="col-md-6">
+                        <div class="card bg-light">
+                            <div class="card-body text-center">
+                                <h3 class="text-primary">{{ artists|length }}</h3>
+                                <small class="text-muted">Всего артистов</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card bg-light">
+                            <div class="card-body text-center">
+                                <h3 class="text-primary">{{ artists|sum(attribute='concerts_count') or 0 }}</h3>
+                                <small class="text-muted">Всего концертов</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    <script>
+        document.getElementById('dateInput').min = new Date().toISOString().split('T')[0];
+    </script>
+{% endblock %}

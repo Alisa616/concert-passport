@@ -30,6 +30,7 @@ class Users(db.Model, UserMixin):
 
     # Связи
     attendance = db.relationship('Attendance', backref='user', lazy=True, cascade='all, delete-orphan')
+    favorites = db.relationship('Favorites', backref='user', lazy=True, cascade='all, delete-orphan')
 
     def set_password(self, password):
         """Устанавливает хеш пароля"""
@@ -93,6 +94,12 @@ class Concerts(db.Model):
 
     # Связи
     attendance = db.relationship('Attendance', backref='concert', lazy=True, cascade='all, delete-orphan')
+    favorites = db.relationship('Favorites', backref='concert', cascade='all, delete-orphan')
+
+    @property
+    def favorites_count(self):
+        """Количество пользователей добавивших концерт в избранное"""
+        return len(self.favorites)
 
     @property
     def is_upcoming(self):
@@ -125,3 +132,17 @@ class Attendance(db.Model):
 
     def __repr__(self):
         return f'<Attendance: {self.user.name} at concert {self.concert_id}>'
+
+class Favorites(db.Model):
+    """Модель избранных концертов"""
+    __tablename__ = 'favorites'
+
+    id = db.Column(db.Integer, primary_key=True)
+    concert_id = db.Column(db.Integer, db.ForeignKey('concerts.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    added_at = db.Column(db.TIMESTAMP, nullable=False, default=datetime.utcnow)
+
+    __table_args__ = (db.UniqueConstraint('concert_id', 'user_id', name='unique_favorite'),)
+
+    def __repr__(self):
+        return f'<Favorite: {self.user.name} -> {self.concert_id}>'
